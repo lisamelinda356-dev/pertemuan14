@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroEvolve Studio - Simulator Neuroevolusi Interaktif</title>
+    <meta name="description" content="Simulator web neuroevolusi interaktif di mana populasi drone dilatih secara mandiri menuju target dengan diagram saraf aktif dan grafik tren evolusi real-time. Built with pure HTML/CSS/JS.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">N</div>
+            <h1>NEUROEVOLVE STUDIO</h1>
+        </div>
+
+        <div class="global-stats">
+            <div class="status-indicator" id="simulationStatus">
+                <span class="indicator-dot"></span>
+                <span id="statusText">BERHENTI</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Generasi</span>
+                <span class="stat-val" id="statGeneration">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Populasi</span>
+                <span class="stat-val" id="statAliveCount">0/0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Sampai Target</span>
+                <span class="stat-val highlight" id="statReachedCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Fitness Tertinggi</span>
+                <span class="stat-val" id="statMaxFitness">0.00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid Layout -->
+    <main>
+        <!-- Left Sidebar: Configuration Controls -->
+        <aside class="sidebar">
+            <!-- Section 1: Vehicle & Environment presets -->
+            <section class="glass-panel panel-section">
+                <h2 class="panel-title">Tipe Agen & Lingkungan</h2>
+                
+                <div class="control-group">
+                    <label for="agentTypeSelect">Jenis Kendaraan/Agen</label>
+                    <select id="agentTypeSelect">
+                        <option value="drone" selected>Drone (Quadcopter)</option>
+                        <option value="car">Mobil (Ackermann Steering)</option>
+                        <option value="ant">Semut (Crawling Physics)</option>
+                        <option value="fly">Lalat (Chaotic Hovering)</option>
+                        <option value="plane">Pesawat (Aerodynamic Flight)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Gambar Kanvas</label>
+                    <div class="draw-toolbar">
+                        <button class="btn active" id="toolWall" data-tool="wall" title="Gambar Dinding/Rintangan">Dinding</button>
+                        <button class="btn" id="toolEraser" data-tool="eraser" title="Hapus Dinding Terdekat">Hapus</button>
+                        <button class="btn" id="toolStart" data-tool="start" title="Pindahkan Titik Awal">Awal</button>
+                        <button class="btn" id="toolTarget" data-tool="target" title="Pindahkan Titik Target">Target</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Rintangan Bawaan</label>
+                    <div class="preset-toolbar">
+                        <button class="btn" id="presetMaze">Grid Labirin</button>
+                        <button class="btn" id="presetCurve">Tikungan S</button>
+                        <button class="btn" id="presetObstacles">Pilar Acak</button>
+                        <button class="btn" id="presetEmpty">Kosong</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Genetic Algorithm Tuning -->
+            <section class="glass-panel panel-section">
+                <h2 class="panel-title">Algoritma Genetika</h2>
+
+                <div class="control-group">
+                    <label for="inputPopSize">Ukuran Populasi <span id="valPopSize">100</span></label>
+                    <input type="range" id="inputPopSize" min="20" max="250" step="10" value="100">
+                </div>
+
+                <div class="control-group">
+                    <label for="inputMutRate">Tingkat Mutasi <span id="valMutRate">5%</span></label>
+                    <input type="range" id="inputMutRate" min="1" max="50" step="1" value="5">
+                </div>
+
+                <div class="control-group">
+                    <label for="inputElitism">Laju Elitisme <span id="valElitism">5%</span></label>
+                    <input type="range" id="inputElitism" min="0" max="20" step="1" value="5">
+                </div>
+            </section>
+
+            <!-- Section 3: Neural Network Layers Designer -->
+            <section class="glass-panel panel-section">
+                <h2 class="panel-title">Arsitektur Saraf Dinamis</h2>
+                <div class="control-group" style="margin-bottom: 8px;">
+                    <label>Lapisan Tersembunyi (Hidden Layers)</label>
+                </div>
+                
+                <div id="hiddenLayersList">
+                    <!-- Dynamic Layer items added by script -->
+                </div>
+
+                <button class="btn btn-mini btn-mini-add" id="btnAddLayer">+ Tambah Lapisan</button>
+            </section>
+        </aside>
+
+        <!-- Center Area: Simulation Canvas and Playback Overlay -->
+        <article class="center-area">
+            <div class="simulation-wrapper glass-panel">
+                <canvas id="simulationCanvas"></canvas>
+                
+                <!-- Floating Overlay Playback controls -->
+                <div class="playback-bar">
+                    <button class="btn btn-primary" id="btnPlayPause" title="Mulai / Jeda Simulasi">▶</button>
+                    <button class="btn" id="btnRestart" title="Mulai Ulang Evolusi">⟳</button>
+                    <button class="btn" id="btnClearWalls" title="Hapus Semua Dinding Rintangan">✕ Bersih</button>
+                    
+                    <div class="speed-controls">
+                        <button class="btn speed-btn active" data-speed="1">1x</button>
+                        <button class="btn speed-btn" data-speed="2">2x</button>
+                        <button class="btn speed-btn" data-speed="5">5x</button>
+                        <button class="btn speed-btn" data-speed="10">10x</button>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Right Sidebar: Diagnostics & Charts -->
+        <aside class="sidebar">
+            <!-- Section 1: Active Neural Net Visualizer -->
+            <section class="glass-panel panel-section net-visualizer-container">
+                <h2 class="panel-title">Diagram Saraf Aktif</h2>
+                <canvas id="netVisualizerCanvas"></canvas>
+            </section>
+
+            <!-- Section 2: Top Live Leaderboard -->
+            <section class="glass-panel panel-section">
+                <h2 class="panel-title">Klasemen Live (Terbaik)</h2>
+                <div class="leaderboard-list" id="leaderboardContainer">
+                    <!-- Dynamic Leaderboard list generated programmatically -->
+                </div>
+            </section>
+
+            <!-- Section 3: Evolution History Chart -->
+            <section class="glass-panel panel-section chart-container">
+                <h2 class="panel-title">Tren Kemajuan Evolusi</h2>
+                <canvas id="trendCanvas"></canvas>
+            </section>
+        </aside>
+    </main>
+
+    <!-- Embedded Scripts -->
+    <script src="neural.js"></script>
+    <script src="genetic.js"></script>
+    <script src="chart.js"></script>
+    <script src="simulator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
